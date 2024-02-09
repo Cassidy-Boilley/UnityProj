@@ -48,6 +48,7 @@ public class MoveCubes : MonoBehaviour {
             }
         }
     }
+
     void SpawnFoodAroundPlane(int count)
     {
         for (int i = 0; i < count; i++)
@@ -70,26 +71,30 @@ public class MoveCubes : MonoBehaviour {
             if (Input.GetKey(KeyCode.UpArrow)) { localCubePos.y -= 0.05f; }
             if (Input.GetKey(KeyCode.DownArrow)) { localCubePos.y += 0.05f; }
             networkComm.sendMessage("ID=1;" + localCubePos.x + "," + localCubePos.y + "," + localCubePos.z);
-            localCube.transform.position = localCubePos;
-            CheckFoodDistance();
+            
             /*if (Vector3.Distance(localCubePos, remoteCubePos) < 2.0f)
                 Debug.Log("Collision Detected");*/
 
-            if (Vector3.Distance(localCubePos, remoteCubePos) < 2.0f) // Assuming cubes collide if closer than 2 units
-            {
-                // Determine the size of each cube
-                float localCubeSize = localCube.transform.localScale.x; // Assuming uniform scaling
-                float remoteCubeSize = remoteCube.transform.localScale.x; // Assuming uniform scaling
-
-                // Trigger Game Over only if the cubes are of different sizes
-                if (localCubeSize != remoteCubeSize)
-                {
-                    GameOver();
-                }
-            }
+            
 
         }
+        localCube.transform.position = localCubePos;
         remoteCube.transform.position = remoteCubePos;
+
+        CheckFoodDistance();
+
+        if (Vector3.Distance(localCubePos, remoteCubePos) < 2.0f) // Assuming cubes collide if closer than 2 units
+        {
+            // Determine the size of each cube
+            float localCubeSize = localCube.transform.localScale.x; // Assuming uniform scaling
+            float remoteCubeSize = remoteCube.transform.localScale.x; // Assuming uniform scaling
+
+            // Trigger Game Over only if the cubes are of different sizes
+            if (localCubeSize != remoteCubeSize)
+            {
+                GameOver();
+            }
+        }
     }
 
     void GameOver()

@@ -20,7 +20,7 @@ class TestMulticastOptionSender
             mcastSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             IPEndPoint endPoint = new IPEndPoint(mcastAddress, mcastPort);
 
-            float x = 1.0f, y = 1.0f, z = 1.0f; // Initialize coordinates
+            float x = 1.0f, y = 1.0f, z = -0.5f; // Initialize coordinates
 
             Console.WriteLine("Press 'W', 'A', 'S', 'D' to move the cube. Press 'Q' to quit.");
 
@@ -33,24 +33,23 @@ class TestMulticastOptionSender
                     switch (key)
                     {
                         case ConsoleKey.W:
-                            y += 0.05f; // Move up
+                            y -= 0.5f; // Move up
                             break;
                         case ConsoleKey.S:
-                            y -= 0.05f; // Move down
+                            y += 0.5f; // Move down
                             break;
                         case ConsoleKey.A:
-                            x -= 0.05f; // Move left
+                            x -= 0.5f; // Move left
                             break;
                         case ConsoleKey.D:
-                            x += 0.05f; // Move right
+                            x += 0.5f; // Move right
                             break;
                         case ConsoleKey.Q:
                             running = false; // Quit program
                             break;
                     }
 
-                    // Increment Z coordinate
-                    z += 0.05f;
+                    
 
                     string message = "ID=2;" + x + "," + y + "," + z;
                     byte[] bytes = Encoding.ASCII.GetBytes(message);
