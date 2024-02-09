@@ -20,7 +20,7 @@ class TestMulticastOptionSender
             mcastSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             IPEndPoint endPoint = new IPEndPoint(mcastAddress, mcastPort);
 
-            float x = 1.0f, y = 1.0f, z = -0.5f; // Initialize coordinates
+            float x = -4.0f, y = 1.0f, z = -0.5f; // Initialize coordinates
 
             Console.WriteLine("Press 'W', 'A', 'S', 'D' to move the cube. Press 'Q' to quit.");
 
@@ -56,7 +56,7 @@ class TestMulticastOptionSender
                     Console.WriteLine("Sent: " + message); // Fix the output format
                     mcastSocket.SendTo(bytes, endPoint);
                 }
-                Thread.Sleep(100); // Small delay to reduce CPU usage
+                Thread.Sleep(10); // Small delay to reduce CPU usage
             }
         }
         catch (Exception e)

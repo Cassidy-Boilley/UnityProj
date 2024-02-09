@@ -6,6 +6,7 @@ public class MoveCubes : MonoBehaviour {
     public GameObject localCube, remoteCube;
     public Vector3 localCubePos = new Vector3();
     public Vector3 remoteCubePos = new Vector3();
+    private float baseMove = 0.05f;
     public GameObject foodPrefab; // Assign this in the Inspector with your food prefab.
     private List<GameObject> foodObjects = new List<GameObject>(); // List to store food instances
 
@@ -66,16 +67,14 @@ public class MoveCubes : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         if (Input.anyKey) {
-            if (Input.GetKey(KeyCode.RightArrow)) { localCubePos.x += 0.05f; }
-            if (Input.GetKey(KeyCode.LeftArrow)) { localCubePos.x -= 0.05f;  }
-            if (Input.GetKey(KeyCode.UpArrow)) { localCubePos.y -= 0.05f; }
-            if (Input.GetKey(KeyCode.DownArrow)) { localCubePos.y += 0.05f; }
+            if (Input.GetKey(KeyCode.RightArrow)) { localCubePos.x += baseMove; }
+            if (Input.GetKey(KeyCode.LeftArrow)) { localCubePos.x -= baseMove;  }
+            if (Input.GetKey(KeyCode.UpArrow)) { localCubePos.y -= baseMove; }
+            if (Input.GetKey(KeyCode.DownArrow)) { localCubePos.y += baseMove; }
             networkComm.sendMessage("ID=1;" + localCubePos.x + "," + localCubePos.y + "," + localCubePos.z);
             
             /*if (Vector3.Distance(localCubePos, remoteCubePos) < 2.0f)
                 Debug.Log("Collision Detected");*/
-
-            
 
         }
         localCube.transform.position = localCubePos;
@@ -128,7 +127,7 @@ public class MoveCubes : MonoBehaviour {
         while(true) {
             Thread.Sleep(1000);
             processMsg("ID=2;" + x + "," + y + "," + z);
-            x += 0.05f; y += 0.05f; z += 0.05f;
+            x += 0.05f; y += 0.05f;
         }
     }
 }
