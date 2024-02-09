@@ -16,8 +16,8 @@ public class MoveCubes : MonoBehaviour {
         networkComm.MsgReceived += new NetworkComm.MsgHandler(processMsg);
         (new Thread(new ThreadStart(networkComm.ReceiveMessages))).Start();
         //(new Thread(new ThreadStart(threadfunc))).Start();
-        localCubePos.x = 1.0f; localCubePos.y = 1.0f; localCubePos.z = 1.0f;
-        remoteCubePos.x = 5.0f; remoteCubePos.y = 1.0f; remoteCubePos.z = 1.0f;
+        localCubePos.x = 4.0f; localCubePos.y = 1.0f; localCubePos.z = -0.5f;
+        remoteCubePos.x = -4.0f; remoteCubePos.y = 1.0f; remoteCubePos.z = -0.5f;
         remoteCube = GameObject.Find("Cube1"); localCube = GameObject.Find("Cube2");
         remoteCube.transform.position = remoteCubePos;
         localCube.transform.position = localCubePos;
@@ -52,7 +52,7 @@ public class MoveCubes : MonoBehaviour {
     {
         for (int i = 0; i < count; i++)
         {
-            Vector3 foodPosition = new Vector3(Random.Range(-10.0f, 10.0f), Random.Range(-10.0f, 10.0f), 1.0f);
+            Vector3 foodPosition = new Vector3(Random.Range(-10.0f, 10.0f), Random.Range(-10.0f, 10.0f), -.5f);
             GameObject foodInstance = Instantiate(foodPrefab, foodPosition, Quaternion.identity);
             foodObjects.Add(foodInstance); // Add the new food instance to the list
         }
@@ -119,7 +119,7 @@ public class MoveCubes : MonoBehaviour {
     }
     public void threadfunc()
     {
-        float x = 1.0f, y = 1.0f, z = 1.0f;
+        float x = -4.0f, y = 0.05f, z = -0.5f;
         while(true) {
             Thread.Sleep(1000);
             processMsg("ID=2;" + x + "," + y + "," + z);
