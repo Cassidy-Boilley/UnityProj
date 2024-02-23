@@ -1,53 +1,74 @@
-using System; using System.Net; using System.Net.Sockets; using System.Text;
-using System.Collections; using System.Collections.Generic; using UnityEngine;
-namespace NetworkAPI {
-    public class NetworkComm {
+using System;
+using System.Net.WebSockets;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace NetworkAPI
+{
+    public class NetworkComm
+    {
         public delegate void MsgHandler(string message);
         public event MsgHandler MsgReceived;
-        public void sendMessage(String message) {
-            Socket mcastSocket = null;
-            try {
-                mcastSocket = new Socket(AddressFamily.InterNetwork,
-                               SocketType.Dgram, ProtocolType.Udp);
-                IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("230.0.0.1"), 11000);
-                mcastSocket.SendTo(ASCIIEncoding.ASCII.GetBytes(message), endPoint);
-            } catch (Exception e) { Debug.Log("\n" + e.ToString()); }
-            mcastSocket.Close();
-        }
-        public void ReceiveMessages()
+
+        public async Task SendMessageAsync(string message)
         {
-            Socket mcastSocket = null;
+            ClientWebSocket ws = null;
             try
             {
-                mcastSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                EndPoint localEP = (EndPoint)new IPEndPoint(IPAddress.Any, 11000);
-                mcastSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, 1);
-                mcastSocket.Bind(localEP);
-                MulticastOption mcastOption = new MulticastOption(IPAddress.Parse("230.0.0.1"), IPAddress.Any);
-                mcastSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, mcastOption);
+                ws = new ClientWebSocket();
+                Uri serverUri = new Uri("ws://localhost:52758/ws.ashx");
+                CancellationToken cancellationToken = CancellationToken.None;
+                await ws.ConnectAsync(serverUri, cancellationToken);
 
-                byte[] bytes = new Byte[1000];
+                ArraySegment<byte> bytesToSend = new ArraySegment<byte>(Encoding.UTF8.GetBytes(message));
+                await ws.SendAsync(bytesToSend, WebSocketMessageType.Text, true, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+            finally
+            {
+                if (ws != null)
+                    ws.Dispose();
+            }
+        }
 
-                while (true)
+        public async Task ReceiveMessagesAsync()
+        {
+            ClientWebSocket ws = null;
+            try
+            {
+                ws = new ClientWebSocket();
+                Uri serverUri = new Uri("ws://localhost:52758/ws.ashx");
+                CancellationToken cancellationToken = CancellationToken.None;
+                await ws.ConnectAsync(serverUri, cancellationToken);
+
+                var receiveBuffer = new byte[200];
+                var iterationNo = 0;
+                while (ws.State == WebSocketState.Open && iterationNo++ < 5)
                 {
-                    IPEndPoint groupEP = new IPEndPoint(IPAddress.Parse("230.0.0.1"), 11000);
-                    EndPoint remoteEP = (EndPoint)new IPEndPoint(IPAddress.Any, 0);
-
-                    int bytesReceived = mcastSocket.ReceiveFrom(bytes, ref remoteEP);
-                    string message = Encoding.ASCII.GetString(bytes, 0, bytesReceived);
-                    Debug.Log("Received: " + message); // Output received message
-
-                    // Invoke event to handle received message
-                    MsgReceived?.Invoke(message);
+                    WebSocketReceiveResult result;
+                    do
+                    {
+                        ArraySegment<byte> bytesReceived = new ArraySegment<byte>(receiveBuffer);
+                        result = await ws.ReceiveAsync(bytesReceived, cancellationToken);
+                        string message = Encoding.UTF8.GetString(receiveBuffer, 0, result.Count);
+                        Console.WriteLine("Received: " + message);
+                        MsgReceived?.Invoke(message);
+                    } while (!result.EndOfMessage);
                 }
             }
             catch (Exception e)
             {
-                Debug.Log("\n" + e.ToString());
+                Console.WriteLine(e.ToString());
             }
             finally
             {
-                mcastSocket.Close();
+                if (ws != null)
+                    ws.Dispose();
             }
         }
-    } }
+    }
+}
